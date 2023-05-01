@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "SZ8XXCDqlaEvAfJ/7fE9AXGIPYo0OAz3qw1zaPwlBGw=",
+  "Source": "AccuLynxDataServer",
+  "BasePath": "_content/AccuLynxDataServer",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
