@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccuLynxDataServer", "AccuLynxDataServer\AccuLynxDataServer.csproj", "{F357C178-1F7A-4C3B-B807-3C475070A7AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackOverflowLibrary", "StackOverflowLibrary\StackOverflowLibrary.csproj", "{743604BC-5F80-496B-B5F1-9715A55788E3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F357C178-1F7A-4C3B-B807-3C475070A7AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F357C178-1F7A-4C3B-B807-3C475070A7AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F357C178-1F7A-4C3B-B807-3C475070A7AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F357C178-1F7A-4C3B-B807-3C475070A7AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{743604BC-5F80-496B-B5F1-9715A55788E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{743604BC-5F80-496B-B5F1-9715A55788E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{743604BC-5F80-496B-B5F1-9715A55788E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{743604BC-5F80-496B-B5F1-9715A55788E3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {91326227-35E7-4BBC-9B12-4727B79224DA}
+	EndGlobalSection
+EndGlobal

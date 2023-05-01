@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "wT9tMIY3CZ+V4pCK3gcdbZbtIw2ZWYWIZC7BMbmoeNiEx+D/exrfRaNTJnTrV1XTdeMbeWgylze5NUDWRWDc9A==",
+  "success": true,
+  "projectFilePath": "C:\\gitrepos\\acculynx\\server\\acculynx-server\\AccuLynxDataServer\\StackOverflowLibrary\\StackOverflowLibrary.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\vmkem\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\7.0.0\\microsoft.extensions.logging.abstractions.7.0.0.nupkg.sha512",
+    "C:\\Users\\vmkem\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
