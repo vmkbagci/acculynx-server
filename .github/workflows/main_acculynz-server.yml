@@ -12,6 +12,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults: 
+      run: 
+        working-directory: /home/runner/work/acculynx-server/acculynx-server/AccuLynxDataServer
 
     steps:
       - uses: actions/checkout@v2
