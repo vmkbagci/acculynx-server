@@ -1,3 +1,5 @@
+using StackOverflowLibrary;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -18,6 +20,9 @@ builder.Services.AddCors(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Adding Scoped injection for now
+builder.Services.AddScoped<IStackOverflowAccessor, StackOverflowAccessor>();
 
 var app = builder.Build();
 

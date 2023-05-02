@@ -8,18 +8,18 @@ namespace AccuLynxDataServer.Controllers
     [Route("[controller]")]
     public class StackOverflowController : ControllerBase
     {
-        private readonly ILogger<StackOverflowController> _logger;
+        private readonly ILogger<StackOverflowController> logger;
+        private readonly IStackOverflowAccessor stackOverflowAccessor;
 
-        public StackOverflowController(ILogger<StackOverflowController> logger)
+        public StackOverflowController(ILogger<StackOverflowController> logger, IStackOverflowAccessor stackOverflowAccessor)
         {
-            _logger = logger;
+            this.logger = logger;
+            this.stackOverflowAccessor = stackOverflowAccessor;
         }
 
         [HttpGet(Name = "GetRandomQuestion")]
         public async Task<Question> GetRandomQuestion(DateTime createdAtOrAfter)
         {
-            var stackOverflowAccessor = new StackOverflowAccessor();
-
             var questionIds = await stackOverflowAccessor.GetQuestionIdsWithAnswers(createdAtOrAfter);
 
             if (!questionIds.Any()) return null;
