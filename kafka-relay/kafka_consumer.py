@@ -1,0 +1,156 @@
+from typing import Optional
+from app.model.incoming_queue import IncomingQueue
+
+import xmltodict  # type: ignore
+from confluent_kafka import Consumer, KafkaError, Message  # type: ignore
+import logging
+import random
+
+
+LOGGING_API_URL = "http://172.17.0.3:5000/logging/generic"
+
+SSL_CERT_PATH = "/projects/itrade-notification-service/certs/client/itrade.macbank.crt"
+SSL_KEY_PATH = (
+    "/projects/itrade-notification-service/certs/client/itrade.macbank-private.key"
+)
+
+bootstrap_servers_mapping = {
+    "DEV": (
+        "b-1.cfmmtsmtsmsgmskstagin.0q0n5f.c21.kafka.us-east-1.amazonaws.com:9094,"
+        "b-2.cfmmtsmtsmsgmskstagin.0q0n5f.c21.kafka.us-east-1.amazonaws.com:9094,"
+        "b-3.cfmmtsmtsmsgmskstagin.0q0n5f.c21.kafka.us-east-1.amazonaws.com:9094"
+    ),
+    "UAT": (
+        "b-1.cfmmtsmtsmsgmskstagin.0q0n5f.c21.kafka.us-east-1.amazonaws.com:9094,"
+        "b-2.cfmmtsmtsmsgmskstagin.0q0n5f.c21.kafka.us-east-1.amazonaws.com:9094,"
+        "b-3.cfmmtsmtsmsgmskstagin.0q0n5f.c21.kafka.us-east-1.amazonaws.com:9094"
+    ),
+    "PROD": (
+        "b-1.cfmmtsmtsmsgmskreleas.9jtoy2.c20.kafka.us-east-1.amazonaws.com:9094,"
+        "b-2.cfmmtsmtsmsgmskreleas.9jtoy2.c20.kafka.us-east-1.amazonaws.com:9094,"
+        "b-3.cfmmtsmtsmsgmskreleas.9jtoy2.c20.kafka.us-east-1.amazonaws.com:9094"
+    ),
+}
+
+TOPIC = "deal.realtime.notify_01.nyc.relay"
+
+TRADER_NAMES = ["amien", "kemal", "vidya"]
+
+
+class MQKafkaConsumer:
+    def __init__(
+        self,
+        env: str,
+        topic: str,
+        queue: IncomingQueue,
+        filter: Optional[str] = "energy_us_gas",
+    ):
+        self.env = env
+        self.target_logging_endpoint = "n/a"
+        self.topic = topic  # Kafka topic to subscribe to
+        self.consumer = None  # Kafka Consumer instance
+        self.bootstrap_servers = bootstrap_servers_mapping[self.env]
+        self.filter = filter
+        self.publishing_queue = queue
+
+    def _connect(self) -> None:
+        """
+        Creates and configures the Kafka Consumer based on the environment and topic.
+        """
+        print("Attempting to establish connection")
+        # Kafka Consumer configuration
+        config = {
+            "bootstrap.servers": self.bootstrap_servers,
+            "group.id": f"itrade.vcloud-{self.env}",
+            "security.protocol": "SSL",
+            "ssl.ca.location": "/etc/ssl/certs/ca-certificates.crt",
+            "ssl.certificate.location": SSL_CERT_PATH,
+            "ssl.key.location": SSL_KEY_PATH,
+            "auto.offset.reset": "earliest",
+            "enable.auto.commit": False,
+            "auto.commit.interval.ms": 0,
+            "isolation.level": "read_committed",
+        }
+
+        # Create Consumer instance
+        self.consumer = Consumer(config)
+        assert self.consumer
+        self.consumer.subscribe([self.topic])
+        print(f"Connected to Kafka topic: {self.topic} in {self.env} environment.")
+
+    def _process_message(self, msg: Message) -> None:
+        """
+        Processes a Kafka message by printing its content to the screen.
+        """
+
+        # Filter out messages
+        if self.filter in msg.value().decode("utf-8"):
+            # Wrap xml in root then converts to dictionary for cleaner logging
+            msg_as_dict = xmltodict.parse(
+                f"<root>{msg.value().decode('utf-8')}</root>"
+            )["root"]
+
+            try:
+                msg_as_dict["user"] = random.choice(TRADER_NAMES)
+                self._log_msg_contents(msg_as_dict)
+                self.publishing_queue.publish(
+                    {
+                        "topic": self.topic,
+                        "value": msg_as_dict,
+                        "user": msg_as_dict["user"],
+                        "dealtype": msg_as_dict["database_name"],
+                    }
+                )
+                logging.info(f"Publishised message to incoming queue: {msg_as_dict}")
+            except Exception as e:
+                print(f"Error processing message: {e}")
+
+    def _log_msg_contents(self, msg: dict[str, str]) -> None:
+        log_entry = ""
+        for key, val in msg.items():
+            log_entry += f"{key} : {val}\n"
+        # TODO: Define class for logging api interactions
+        # response = requests.post(
+        #     LOGGING_API_URL,
+        #     json={
+        #         "entries": [[log_entry]],
+        #         "order": ["string"],
+        #         "pattern": "string",
+        #     },
+        # )
+        # response.raise_for_status()
+
+    def start(self) -> None:
+        """
+        Starts the Kafka Consumer loop to poll messages and process them.
+        """
+        if not self.consumer:
+            print("Consumer not connected. Call _connect() first.")
+            return
+
+        try:
+            while True:
+                msg = self.consumer.poll(
+                    1.0
+                )  # Poll for messages with a timeout of 1 second
+
+                if msg is None:
+                    print("No msgs")
+                    continue
+                if msg.error():
+                    if msg.error().code() == KafkaError._PARTITION_EOF:
+                        # End of partition event
+                        print(
+                            "%% %s [%d] reached end at offset %d\n"
+                            % (msg.topic(), msg.partition(), msg.offset())
+                        )
+                    else:
+                        print(msg.error())
+                else:
+                    # process messages
+                    self._process_message(msg)
+        except KeyboardInterrupt:
+            print("Consumer interrupted by user.")
+        finally:
+            print("Consumer Closing...")
+            self.consumer.close()
