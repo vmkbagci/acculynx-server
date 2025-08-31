@@ -32,4 +32,23 @@ def start_kafka_consumer(incoming_queue: IncomingQueue, topic: str = TOPIC) -> N
         consumer._connect()
         consumer.start()
 
+    import asyncio
+from kafka_relay.incoming_queue import IncomingQueue
+from kafka_relay.parser_enricher import BatchEnricher
+from kafka_relay.kafka_consumer import MQKafkaConsumer
+
+# Create the outgoing queue for enriched items
+incoming_queue = IncomingQueue()
+
+# Create the batch enricher, outputting to the queue
+enricher = BatchEnricher(
+    out_queue=incoming_queue,  # Pass the instance!
+    batch_size=20,
+    idle_seconds=5.0,
+    api_url="http://...",      # Set as appropriate
+)
+
+# Pass the enricher, NOT the queue, to KafkaConsumer
+consumer = MQKafkaConsumer(env, topic, enricher=enricher)
+
     threading.Thread(target=_worker, daemon=True).start()
